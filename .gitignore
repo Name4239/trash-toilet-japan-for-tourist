@@ -1,0 +1,26 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Dependencies and build outputs
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+
+# Runtime and temporary files
+*.log
+output/
+outputs/
+tmp/
+
+# Editors and operating systems
+.agents/
+.claude/
+.windsurf/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

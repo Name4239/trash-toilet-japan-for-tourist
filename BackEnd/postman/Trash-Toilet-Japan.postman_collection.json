@@ -1,0 +1,205 @@
+{
+  "info": {
+    "name": "Trash & Toilet Japan API",
+    "description": "เรียงทดสอบจาก Auth ไป Places และ Reports ใช้ตัวแปร token/placeId/reportId อัตโนมัติ",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "memberToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "placeId", "value": "1" },
+    { "key": "reportId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register Member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Taro\",\n  \"email\": \"taro@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login Member",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["const data = pm.response.json();", "if (data.token) pm.collectionVariables.set('memberToken', data.token);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"taro@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["const data = pm.response.json();", "if (data.token) pm.collectionVariables.set('adminToken', data.token);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Current User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Places",
+      "item": [
+        {
+          "name": "Create Place as Member",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["const data = pm.response.json();", "if (data.place) pm.collectionVariables.set('placeId', data.place.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{memberToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Tokyo Public Toilet", "type": "text" },
+                { "key": "type", "value": "toilet", "type": "text" },
+                { "key": "address", "value": "Tokyo Station", "type": "text" },
+                { "key": "latitude", "value": "35.6812", "type": "text" },
+                { "key": "longitude", "value": "139.7671", "type": "text" },
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/places"
+          }
+        },
+        {
+          "name": "Get Active Places",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/places" }
+        },
+        {
+          "name": "Get Nearby Places",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/places/nearby?latitude=35.6812&longitude=139.7671&radius=5"
+          }
+        },
+        {
+          "name": "Get Place Detail",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/places/{{placeId}}" }
+        },
+        {
+          "name": "Admin Get All Places",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/places?status=all"
+          }
+        },
+        {
+          "name": "Admin Get Pending Places",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/places/pending"
+          }
+        },
+        {
+          "name": "Admin Approve Place",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"active\"\n}" },
+            "url": "{{baseUrl}}/api/places/{{placeId}}/status"
+          }
+        },
+        {
+          "name": "Admin Delete Place",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/places/{{placeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Reports",
+      "item": [
+        {
+          "name": "Create Report",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["const data = pm.response.json();", "if (data.report) pm.collectionVariables.set('reportId', data.report.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{memberToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placeId\": {{placeId}},\n  \"reason\": \"closed\",\n  \"description\": \"Temporarily unavailable\"\n}"
+            },
+            "url": "{{baseUrl}}/api/reports"
+          }
+        },
+        {
+          "name": "Admin Get Reports",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/reports"
+          }
+        },
+        {
+          "name": "Admin Get Report Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/reports/{{reportId}}"
+          }
+        },
+        {
+          "name": "Admin Resolve Report",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"resolved\"\n}" },
+            "url": "{{baseUrl}}/api/reports/{{reportId}}/status"
+          }
+        }
+      ]
+    }
+  ]
+}

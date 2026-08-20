@@ -1,0 +1,9 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# ไม่เก็บรูปจากผู้ใช้ใน Git แต่เก็บโฟลเดอร์ไว้
+uploads/*
+!uploads/.gitkeep

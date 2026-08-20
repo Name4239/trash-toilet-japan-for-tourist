@@ -1,0 +1,92 @@
+// ลำดับอ่าน 6: อ่านไฟล์นี้เพื่อเข้าใจโครงสร้าง Database หลังดู Controller
+// User เชื่อม Place และ Report แบบ 1:N ผ่าน createdById/reporterId
+// เมื่อแก้ไฟล์นี้ ต้องรัน prisma migrate และ prisma generate ก่อนใช้โค้ดใหม่
+
+generator client {
+  // สร้าง Prisma Client ให้ JavaScript import ไปใช้ใน src/lib/prisma.js
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  // MariaDB ใช้ connector เดียวกับ MySQL
+  provider = "mysql"
+}
+
+enum UserRole {
+  member
+  admin
+}
+
+enum PlaceType {
+  toilet
+  trash
+}
+
+enum PlaceStatus {
+  pending
+  active
+  rejected
+  inactive
+}
+
+enum ReportStatus {
+  pending
+  resolved
+  rejected
+}
+
+model User {
+  // User หนึ่งคนสร้าง Place และ Report ได้หลายรายการ
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  avatarUrl String?
+  role      UserRole @default(member)
+  places    Place[]
+  reports   Report[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Place {
+  // createdById เป็น Foreign Key ที่ชี้กลับไปยัง User
+  id          Int         @id @default(autoincrement())
+  name        String
+  type        PlaceType
+  address     String
+  imageUrl    String?
+  latitude    Float
+  longitude   Float
+  status      PlaceStatus @default(pending)
+  createdById Int
+  createdBy   User        @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  reports     Report[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([latitude, longitude])
+  @@index([createdById])
+}
+
+model Report {
+  // Report เชื่อมทั้ง User ผู้รายงานและ Place ที่ถูกรายงาน
+  id               Int          @id @default(autoincrement())
+  reason           String
+  description      String?
+  evidenceImageUrl String?
+  status           ReportStatus @default(pending)
+  placeId          Int
+  reporterId       Int
+  place            Place        @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  reporter         User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([status])
+  @@index([placeId])
+  @@index([reporterId])
+}
