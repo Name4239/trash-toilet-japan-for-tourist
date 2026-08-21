@@ -12,6 +12,9 @@ const adapter = new PrismaMariaDb({
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
+  // MySQL 8 may use caching_sha2_password, which requires the client to
+  // retrieve the server's RSA public key when the connection is not using TLS.
+  allowPublicKeyRetrieval: true,
   connectionLimit: 5,
 });
 

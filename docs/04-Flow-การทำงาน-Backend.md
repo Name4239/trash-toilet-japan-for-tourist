@@ -298,6 +298,8 @@ Controller ทุกตัวใช้ `try/catch` เพื่อเปลี�
 → export prisma
 ```
 
+ในโปรเจกต์นี้ adapter มี `allowPublicKeyRetrieval: true` เพื่อให้เชื่อมต่อ MySQL 8 ที่ใช้ `caching_sha2_password` ในเครื่องพัฒนาได้ หากขาดค่านี้ request ที่ต้องอ่าน Database เช่น Login อาจจบด้วย `RSA public key is not available client side` และ pool timeout
+
 Controller เรียกคำสั่ง เช่น:
 
 ```text
