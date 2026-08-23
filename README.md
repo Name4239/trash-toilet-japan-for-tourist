@@ -17,6 +17,74 @@
 → React อัปเดตหน้าจอ
 ```
 
+## วิธีติดตั้งและเปิดโปรเจกต์บนเครื่องใหม่
+
+### 1. ติดตั้งโปรแกรมที่จำเป็น
+
+- [Node.js](https://nodejs.org/) รุ่น LTS
+- MariaDB หรือ MySQL
+- Git
+
+### 2. Clone โปรเจกต์และติดตั้ง Dependencies
+
+```powershell
+git clone https://github.com/Name4239/trash-toilet-japan-for-tourist.git
+cd trash-toilet-japan-for-tourist
+
+cd BackEnd
+npm install
+
+cd ../FrontEnd
+npm install
+```
+
+### 3. สร้างไฟล์ `.env`
+
+```powershell
+Copy-Item BackEnd/.env.example BackEnd/.env
+Copy-Item FrontEnd/.env.example FrontEnd/.env
+```
+
+แก้ `BackEnd/.env` ให้ตรงกับฐานข้อมูลของเครื่อง โดยเฉพาะ `DATABASE_URL`,
+`DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` และตั้ง `JWT_SECRET`
+เป็นข้อความสุ่มที่ยาวและคาดเดายาก
+
+Frontend ควรเชื่อมต่อ Backend ด้วยค่านี้:
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+### 4. เตรียมฐานข้อมูล
+
+สร้างฐานข้อมูล MariaDB/MySQL ตามชื่อที่กำหนดใน `BackEnd/.env` แล้วรัน:
+
+```powershell
+cd BackEnd
+npx prisma generate
+npx prisma db push
+```
+
+### 5. เปิด Backend
+
+```powershell
+cd BackEnd
+npm run dev
+```
+
+Backend จะทำงานที่ `http://localhost:3000` ให้เปิด Terminal นี้ค้างไว้
+
+### 6. เปิด Frontend
+
+เปิด Terminal ใหม่ แล้วรัน:
+
+```powershell
+cd FrontEnd
+npm run dev
+```
+
+จากนั้นเปิด `http://localhost:5173`
+
 ## วิธีเปิดทั้งโปรเจกต์
 
 Terminal 1:
@@ -49,5 +117,4 @@ npm run seed:demo
 Member: demo.member@example.com / 123456
 Admin:  demo.admin@example.com / 123456
 ```
-
 
