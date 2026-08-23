@@ -1,13 +1,10 @@
-// หัวข้อที่ใช้ซ้ำ รองรับชื่อ คำอธิบาย และปุ่มย้อนกลับ
-// มีสีแยก Light/Dark เพื่อให้ทุกหน้าอ่านง่าย
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react"; // หัวข้อที่ใช้ซ้ำ รองรับชื่อ คำอธิบาย และปุ่มย้อนกลับ | มีสีแยก Light/Dark เพื่อให้ทุกหน้าอ่านง่าย
+import { useNavigate } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function PageHeader({ title, subtitle, back = false }) {
-  // useNavigate ใช้สั่งย้อนกลับหนึ่งหน้าเมื่อกดลูกศร
-  const navigate = useNavigate();
+export default function PageHeader({ title, subtitle, back = false }) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const navigate = useNavigate(); // useNavigate ใช้สั่งย้อนกลับหนึ่งหน้าเมื่อกดลูกศร
 
-  return (
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <header className="sticky top-0 z-[900] border-b border-cream-100 bg-cream-50/95 px-5 py-4 text-ink backdrop-blur dark:border-stone-700 dark:bg-[#25221f]/95 dark:text-[#f0e9df]">
       <div className="flex items-center gap-3">
         {/* สร้างปุ่มย้อนกลับเฉพาะหน้าที่ส่ง back=true */}

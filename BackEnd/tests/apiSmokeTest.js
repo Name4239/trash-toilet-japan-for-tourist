@@ -1,13 +1,10 @@
-// อ่านไฟล์นี้หลังเข้าใจ API แล้ว: เป็นผู้ใช้จำลองที่เรียก API ตาม Flow จริง
-// ลำดับทดสอบอยู่ใน runTests() และ finally จะ cleanup ข้อมูลที่ script สร้าง
-import "dotenv/config";
+import "dotenv/config"; // อ่านไฟล์นี้หลังเข้าใจ API แล้ว: เป็นผู้ใช้จำลองที่เรียก API ตาม Flow จริง | ลำดับทดสอบอยู่ใน runTests() และ finally จะ cleanup ข้อมูลที่ script สร้าง
 import fs from "fs";
 import path from "path";
 
 import { prisma } from "../src/lib/prisma.js";
 
-// ชุดทดสอบนี้ต้องรันหลัง npm run dev และจะลบข้อมูลทดสอบของตัวเองเมื่อจบ
-const baseUrl = `http://localhost:${process.env.PORT || 5000}`;
+const baseUrl = `http://localhost:${process.env.PORT || 5000}`; // ชุดทดสอบนี้ต้องรันหลัง npm run dev และจะลบข้อมูลทดสอบของตัวเองเมื่อจบ
 const uniqueId = Date.now();
 const memberEmail = `member-${uniqueId}@example.com`;
 const adminEmail = `admin-${uniqueId}@example.com`;
@@ -54,8 +51,7 @@ async function login(email) {
 }
 
 async function runTests() {
-  // 1) สร้าง Member และ Admin สำหรับการทดสอบครั้งนี้
-  const memberRegister = await register("Test Member", memberEmail);
+  const memberRegister = await register("Test Member", memberEmail); // 1) สร้าง Member และ Admin สำหรับการทดสอบครั้งนี้
   const adminRegister = await register("Test Admin", adminEmail);
   expect("Register member", memberRegister.status === 201);
   expect("Register admin account", adminRegister.status === 201);
@@ -63,11 +59,9 @@ async function runTests() {
   memberId = memberRegister.data.user.id;
   adminId = adminRegister.data.user.id;
 
-  // Register API สร้างทุกคนเป็น member จึงเปลี่ยน test account นี้เป็น admin โดยตรง
-  await prisma.user.update({ where: { id: adminId }, data: { role: "admin" } });
+  await prisma.user.update({ where: { id: adminId }, data: { role: "admin" } }); // Register API สร้างทุกคนเป็น member จึงเปลี่ยน test account นี้เป็น admin โดยตรง
 
-  // 2) Login หลังเปลี่ยน role เพื่อให้ JWT ของ Admin มี role ที่ถูกต้อง
-  const memberLogin = await login(memberEmail);
+  const memberLogin = await login(memberEmail); // 2) Login หลังเปลี่ยน role เพื่อให้ JWT ของ Admin มี role ที่ถูกต้อง
   const adminLogin = await login(adminEmail);
   expect("Login member", Boolean(memberLogin.data.token));
   expect("Login admin", Boolean(adminLogin.data.token));
@@ -75,8 +69,7 @@ async function runTests() {
   const memberHeaders = { Authorization: `Bearer ${memberLogin.data.token}` };
   const adminHeaders = { Authorization: `Bearer ${adminLogin.data.token}` };
 
-  // 3) ตรวจ Profile จาก JWT
-  const profile = await request("/api/users/me", { headers: memberHeaders });
+  const profile = await request("/api/users/me", { headers: memberHeaders }); // 3) ตรวจ Profile จาก JWT
   expect("Get current user", profile.data.user.email === memberEmail);
 
   const avatarForm = new FormData();
@@ -105,15 +98,13 @@ async function runTests() {
   const uploadedAvatar = await fetch(`${baseUrl}${avatarUrl}`);
   expect("Uploaded avatar can be opened", uploadedAvatar.status === 200);
 
-  // 4) Member เพิ่ม Place ต้องได้ pending
-  const placeForm = new FormData();
+  const placeForm = new FormData(); // 4) Member เพิ่ม Place ต้องได้ pending
   placeForm.append("name", "Test Member Toilet");
   placeForm.append("type", "toilet");
   placeForm.append("address", "Tokyo Test Address");
   placeForm.append("latitude", "35.6812");
   placeForm.append("longitude", "139.7671");
-  // รูป PNG ขนาดเล็กใช้เฉพาะทดสอบระบบ upload
-  placeForm.append(
+  placeForm.append( // รูป PNG ขนาดเล็กใช้เฉพาะทดสอบระบบ upload
     "image",
     new Blob([Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64")], { type: "image/png" }),
     "test-place.png"
@@ -129,14 +120,12 @@ async function runTests() {
   const uploadedImage = await fetch(`${baseUrl}${memberPlace.data.place.imageUrl}`);
   expect("Uploaded image can be opened", uploadedImage.status === 200);
 
-  // 5) Member ต้องเข้า Admin API ไม่ได้
-  const memberPendingAccess = await request("/api/places/pending", {
+  const memberPendingAccess = await request("/api/places/pending", { // 5) Member ต้องเข้า Admin API ไม่ได้
     headers: memberHeaders,
   });
   expect("Member cannot access pending places", memberPendingAccess.status === 403);
 
-  // 6) Admin ดูคำขอและอนุมัติ Place
-  const pendingPlaces = await request("/api/places/pending", {
+  const pendingPlaces = await request("/api/places/pending", { // 6) Admin ดูคำขอและอนุมัติ Place
     headers: adminHeaders,
   });
   expect(
@@ -154,8 +143,7 @@ async function runTests() {
   );
   expect("Admin approves place", approvedPlace.data.place.status === "active");
 
-  // Admin เพิ่ม Place ต้องเป็น active และปรากฏใน Public Map ทันที
-  const adminPlaceForm = new FormData();
+  const adminPlaceForm = new FormData(); // Admin เพิ่ม Place ต้องเป็น active และปรากฏใน Public Map ทันที
   adminPlaceForm.append("name", "Test Admin Trash Point");
   adminPlaceForm.append("type", "trash");
   adminPlaceForm.append("address", "Tokyo Admin Test Address");
@@ -174,8 +162,7 @@ async function runTests() {
   });
   expect("Admin place is active immediately", adminPlace.data.place.status === "active");
 
-  // 7) Public Map และ Nearby ต้องมองเห็น Place ที่ active
-  const activePlaces = await request("/api/places");
+  const activePlaces = await request("/api/places"); // 7) Public Map และ Nearby ต้องมองเห็น Place ที่ active
   expect(
     "Public sees active place",
     activePlaces.data.places.some((place) => place.id === memberPlace.data.place.id)
@@ -196,8 +183,7 @@ async function runTests() {
     nearbyPlaces.data.places.some((place) => place.id === memberPlace.data.place.id)
   );
 
-  // 8) Member ส่ง Report ต้องเริ่มเป็น pending
-  const reportForm = new FormData();
+  const reportForm = new FormData(); // 8) Member ส่ง Report ต้องเริ่มเป็น pending
   reportForm.append("placeId", String(memberPlace.data.place.id));
   reportForm.append("reason", "test_reason");
   reportForm.append("description", "Created by automated API test");
@@ -215,8 +201,7 @@ async function runTests() {
   expect("Report starts pending", createdReport.data.report.status === "pending");
   expect("Report stores evidence URL", Boolean(createdReport.data.report.evidenceImageUrl));
 
-  // 9) Admin อ่านรายละเอียดและ resolve Report
-  const reports = await request("/api/reports", { headers: adminHeaders });
+  const reports = await request("/api/reports", { headers: adminHeaders }); // 9) Admin อ่านรายละเอียดและ resolve Report
   expect(
     "Admin sees reports",
     reports.data.reports.some((report) => report.id === createdReport.data.report.id)
@@ -238,8 +223,7 @@ async function runTests() {
   );
   expect("Admin resolves report", resolvedReport.data.report.status === "resolved");
 
-  // 10) Admin ดูทุก Place และลบ Place ได้
-  const allPlaces = await request("/api/places?status=all", { headers: adminHeaders });
+  const allPlaces = await request("/api/places?status=all", { headers: adminHeaders }); // 10) Admin ดูทุก Place และลบ Place ได้
   expect("Admin sees all places", allPlaces.status === 200);
 
   const deletedPlace = await request(`/api/places/${memberPlace.data.place.id}`, {
@@ -262,8 +246,7 @@ try {
   console.error(error.message);
   process.exitCode = 1;
 } finally {
-  // ลบเฉพาะ Users ที่ script สร้าง Relations จะถูกลบตามด้วย Cascade
-  if (memberId || adminId) {
+  if (memberId || adminId) { // ลบเฉพาะ Users ที่ script สร้าง Relations จะถูกลบตามด้วย Cascade
     await prisma.user.deleteMany({
       where: { id: { in: [memberId, adminId].filter(Boolean) } },
     });
@@ -274,6 +257,5 @@ try {
     if (fs.existsSync(avatarPath)) fs.unlinkSync(avatarPath);
   }
 
-  // ปิด Database connection เพื่อให้ Node จบการทำงาน
-  await prisma.$disconnect();
+  await prisma.$disconnect(); // ปิด Database connection เพื่อให้ Node จบการทำงาน
 }

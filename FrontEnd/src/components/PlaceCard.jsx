@@ -1,13 +1,10 @@
-// รับ Place จาก SearchPage แล้วแสดงรูป ชื่อ ที่อยู่ และระยะ
-// ปุ่มรายละเอียดส่งไป /places/:id
-import { MapPin, Trash2, Toilet } from "lucide-react";
-import { Link } from "react-router-dom";
-import { getAssetUrl } from "../services/api.js";
+import { MapPin, Trash2, Toilet } from "lucide-react"; // รับ Place จาก SearchPage แล้วแสดงรูป ชื่อ ที่อยู่ และระยะ | ปุ่มรายละเอียดส่งไป /places/:id
+import { Link } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { getAssetUrl } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function PlaceCard({ place, action }) {
-  // เลือก Icon สำรองตามประเภท กรณี Place ไม่มีรูปภาพ
-  const Icon = place.type === "toilet" ? Toilet : Trash2;
-  return (
+export default function PlaceCard({ place, action }) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const Icon = place.type === "toilet" ? Toilet : Trash2; // เลือก Icon สำรองตามประเภท กรณี Place ไม่มีรูปภาพ
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <article className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm">
       {/* ถ้ามี imageUrl ให้แสดงรูปจริง ถ้าไม่มีจึงแสดง Icon */}
       <div className={`grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl ${place.type === "toilet" ? "bg-green-100 text-leaf" : "bg-orange-100 text-brand"}`}>{place.imageUrl ? <img className="h-full w-full object-cover" src={getAssetUrl(place.imageUrl)} alt={place.name} /> : <Icon size={28} />}</div>

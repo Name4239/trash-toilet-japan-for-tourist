@@ -1,28 +1,23 @@
-// ค้นหา Place ตามชื่อ ประเภท และระยะจาก GPS
-// ทุกตัวเลือกระยะทางเรียก /places/nearby โดย "ทั้งหมด" จำกัดไว้ที่ 10 กิโลเมตร
-import { LoaderCircle, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { useGeolocated } from "react-geolocated";
-import PageHeader from "../components/PageHeader.jsx";
-import PlaceCard from "../components/PlaceCard.jsx";
-import { Button, Chip, EmptyState } from "../components/ui.jsx";
-import api, { getErrorMessage } from "../services/api.js";
+import { LoaderCircle, Search } from "lucide-react"; // ค้นหา Place ตามชื่อ ประเภท และระยะจาก GPS | ทุกตัวเลือกระยะทางเรียก /places/nearby โดย "ทั้งหมด" จำกัดไว้ที่ 10 กิโลเมตร
+import { useCallback, useEffect, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useGeolocated } from "react-geolocated"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PageHeader from "../components/PageHeader.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PlaceCard from "../components/PlaceCard.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button, Chip, EmptyState } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api, { getErrorMessage } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function SearchPage() {
-  // กลุ่ม State ของ Filter และผลลัพธ์จาก API
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState("");
-  const [radius, setRadius] = useState(500);
-  const [places, setPlaces] = useState([]);
-  // กลุ่ม State ของสถานะหน้าจอขณะรอ GPS/API
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [waitingForGps, setWaitingForGps] = useState(true);
-  const [pendingFilters, setPendingFilters] = useState({ type: "", radius: 500, search: "" });
-  const [hasSearched, setHasSearched] = useState(false);
+export default function SearchPage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const [search, setSearch] = useState(""); // กลุ่ม State ของ Filter และผลลัพธ์จาก API
+  const [type, setType] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [radius, setRadius] = useState(500); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [places, setPlaces] = useState([]); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [error, setError] = useState(""); // กลุ่ม State ของสถานะหน้าจอขณะรอ GPS/API
+  const [loading, setLoading] = useState(true); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [waitingForGps, setWaitingForGps] = useState(true); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [pendingFilters, setPendingFilters] = useState({ type: "", radius: 500, search: "" }); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [hasSearched, setHasSearched] = useState(false); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
 
-  // ขอ GPS ตั้งแต่เปิดหน้า เพราะค่าเริ่มต้นค้นหาในระยะ 500 เมตร
-  const {
+  const { // ขอ GPS ตั้งแต่เปิดหน้า เพราะค่าเริ่มต้นค้นหาในระยะ 500 เมตร
     coords,
     getPosition,
     positionError,
@@ -33,20 +28,17 @@ export default function SearchPage() {
     suppressLocationOnMount: false,
   });
 
-  // ใช้ฟังก์ชันเดียวกันทั้งตอนกดค้นหา และตอนที่ GPS ส่งพิกัดกลับมา
-  const runSearch = useCallback(
+  const runSearch = useCallback( // ใช้ฟังก์ชันเดียวกันทั้งตอนกดค้นหา และตอนที่ GPS ส่งพิกัดกลับมา
     async (currentCoords = coords, filters = {}) => {
-      // filters ที่ส่งเข้ามามีสิทธิ์แทน State ใช้แก้ปัญหา setState ยังไม่อัปเดตทันที
-      const selectedType = filters.type ?? type;
-      const selectedRadius = filters.radius ?? radius;
-      const selectedSearch = filters.search ?? search;
-      setLoading(true);
-      setError("");
+      const selectedType = filters.type ?? type; // filters ที่ส่งเข้ามามีสิทธิ์แทน State ใช้แก้ปัญหา setState ยังไม่อัปเดตทันที
+      const selectedRadius = filters.radius ?? radius; // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+      const selectedSearch = filters.search ?? search; // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+      setLoading(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
 
-      try {
-        if (selectedRadius) {
-          // Backend รับ radius เป็นกิโลเมตร จึงหารค่าหน่วยเมตรด้วย 1000
-          const response = await api.get("/places/nearby", {
+      try { // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
+        if (selectedRadius) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+          const response = await api.get("/places/nearby", { // Backend รับ radius เป็นกิโลเมตร จึงหารค่าหน่วยเมตรด้วย 1000
             params: {
               latitude: currentCoords.latitude,
               longitude: currentCoords.longitude,
@@ -54,62 +46,57 @@ export default function SearchPage() {
             },
           });
 
-          // API Nearby กรองระยะแล้ว Frontend กรองประเภทและชื่อซ้ำอีกชั้น
-          const filteredPlaces = response.data.places.filter(
+          const filteredPlaces = response.data.places.filter( // API Nearby กรองระยะแล้ว Frontend กรองประเภทและชื่อซ้ำอีกชั้น
             (place) =>
               (!selectedType || place.type === selectedType) &&
               (!selectedSearch || place.name.toLowerCase().includes(selectedSearch.toLowerCase())),
           );
-          setPlaces(filteredPlaces);
+          setPlaces(filteredPlaces); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
         } else {
-          // กรณี radius=0 รองรับการเรียก Place active โดยไม่ใช้ GPS
-          const response = await api.get("/places", {
+          const response = await api.get("/places", { // กรณี radius=0 รองรับการเรียก Place active โดยไม่ใช้ GPS
             params: {
               ...(selectedType && { type: selectedType }),
               ...(selectedSearch && { search: selectedSearch }),
             },
           });
-          setPlaces(response.data.places);
+          setPlaces(response.data.places); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
         }
 
-        setHasSearched(true);
+        setHasSearched(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       } catch (requestError) {
-        setError(getErrorMessage(requestError));
+        setError(getErrorMessage(requestError)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       } finally {
-        setLoading(false);
+        setLoading(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       }
     },
     [coords, radius, search, type],
   );
 
-  // ถ้าตอนกดค้นหา GPS ยังไม่มา ให้ค้นหาต่ออัตโนมัติทันทีที่ได้พิกัด
-  useEffect(() => {
-    if (!waitingForGps || !coords) return;
-    setWaitingForGps(false);
+  useEffect(() => { // ถ้าตอนกดค้นหา GPS ยังไม่มา ให้ค้นหาต่ออัตโนมัติทันทีที่ได้พิกัด
+    if (!waitingForGps || !coords) return; // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+    setWaitingForGps(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     runSearch(coords, pendingFilters || {});
-    setPendingFilters(null);
+    setPendingFilters(null); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
   }, [coords, pendingFilters, runSearch, waitingForGps]);
 
-  // แสดงข้อผิดพลาดเมื่อผู้ใช้ปิดหรือไม่อนุญาต GPS
-  useEffect(() => {
-    if (!waitingForGps || !positionError) return;
-    setWaitingForGps(false);
-    setLoading(false);
-    setError("ไม่สามารถใช้ตำแหน่งได้ กรุณาอนุญาต Location ในเบราว์เซอร์");
+  useEffect(() => { // แสดงข้อผิดพลาดเมื่อผู้ใช้ปิดหรือไม่อนุญาต GPS
+    if (!waitingForGps || !positionError) return; // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+    setWaitingForGps(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setLoading(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setError("ไม่สามารถใช้ตำแหน่งได้ กรุณาอนุญาต Location ในเบราว์เซอร์"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
   }, [positionError, waitingForGps]);
 
-  function handleSearch() {
-    // ถ้ากดก่อน GPS พร้อม ให้จำ Filter แล้วรอ Effect เรียกค้นหาต่อ
-    if (radius && !coords) {
-      if (!isGeolocationAvailable || !isGeolocationEnabled) {
-        setError("อุปกรณ์นี้ปิด GPS หรือไม่รองรับตำแหน่ง");
+  function handleSearch() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    if (radius && !coords) { // ถ้ากดก่อน GPS พร้อม ให้จำ Filter แล้วรอ Effect เรียกค้นหาต่อ
+      if (!isGeolocationAvailable || !isGeolocationEnabled) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+        setError("อุปกรณ์นี้ปิด GPS หรือไม่รองรับตำแหน่ง"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
         return;
       }
 
-      setLoading(true);
-      setWaitingForGps(true);
-      setError("");
-      setPendingFilters({ type, radius, search });
+      setLoading(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setWaitingForGps(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setPendingFilters({ type, radius, search }); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       getPosition();
       return;
     }
@@ -117,15 +104,14 @@ export default function SearchPage() {
     runSearch(coords);
   }
 
-  function applyFilters(nextType, nextRadius) {
-    // กด Chip แล้วค้นหาทันที ไม่ต้องรอกดปุ่มค้นหาอีกครั้ง
-    setType(nextType);
-    setRadius(nextRadius);
+  function applyFilters(nextType, nextRadius) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    setType(nextType); // กด Chip แล้วค้นหาทันที ไม่ต้องรอกดปุ่มค้นหาอีกครั้ง
+    setRadius(nextRadius); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
 
-    if (nextRadius && !coords) {
-      setLoading(true);
-      setWaitingForGps(true);
-      setPendingFilters({ type: nextType, radius: nextRadius, search });
+    if (nextRadius && !coords) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+      setLoading(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setWaitingForGps(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setPendingFilters({ type: nextType, radius: nextRadius, search }); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       getPosition();
       return;
     }
@@ -133,7 +119,7 @@ export default function SearchPage() {
     runSearch(coords, { type: nextType, radius: nextRadius, search });
   }
 
-  return (
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div>
       <PageHeader title="ค้นหาสถานที่" />
       <section className="space-y-5 px-5 py-5">

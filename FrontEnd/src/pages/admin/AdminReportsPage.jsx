@@ -1,25 +1,20 @@
-// โหลดเฉพาะ Report pending แล้วแสดงรายการให้ Admin ตรวจ
-// กดรายการแล้วเปิด AdminReportDetailPage ตาม id
-import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import PageHeader from "../../components/PageHeader.jsx";
-import { EmptyState } from "../../components/ui.jsx";
-import api from "../../services/api.js";
+import { ChevronRight } from "lucide-react"; // โหลดเฉพาะ Report pending แล้วแสดงรายการให้ Admin ตรวจ | กดรายการแล้วเปิด AdminReportDetailPage ตาม id
+import { useEffect, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Link } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PageHeader from "../../components/PageHeader.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { EmptyState } from "../../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api from "../../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function AdminReportsPage() {
-  // reports เก็บงาน pending ที่ Admin ยังไม่ได้ตัดสินใจ
-  const [reports, setReports] = useState([]);
-  // หน้าแจ้งเตือนแสดงเฉพาะงานที่ยังรอดำเนินการ
-  // เมื่อ resolved/rejected แล้ว รายการจะหายจากหน้านี้
-  useEffect(() => {
+export default function AdminReportsPage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const [reports, setReports] = useState([]); // reports เก็บงาน pending ที่ Admin ยังไม่ได้ตัดสินใจ
+  useEffect(() => { // หน้าแจ้งเตือนแสดงเฉพาะงานที่ยังรอดำเนินการ | เมื่อ resolved/rejected แล้ว รายการจะหายจากหน้านี้
     api
       .get("/reports", { params: { status: "pending" } })
       .then((response) => setReports(response.data.reports))
       .catch(() => setReports([]));
   }, []);
 
-  return (
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div><PageHeader title="ตรวจรายงานข้อมูลผิด" subtitle="จัดการรายงานจากผู้ใช้งาน" />
       {/* Link แต่ละรายการส่ง report.id ไปหน้ารายละเอียด */}
       <section className="space-y-3 px-5 py-5">{reports.length ? reports.map((report) => (

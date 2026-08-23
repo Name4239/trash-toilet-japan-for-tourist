@@ -1,7 +1,5 @@
-// แสดง Logo ใน Login/Register โดยอ่านรูปจาก public
-// compact ลดขนาด Logo สำหรับหน้าสมัครสมาชิก
-export default function BrandMark({ compact = false }) {
-  return (
+export default function BrandMark({ compact = false }) { // แสดง Logo ใน Login/Register โดยอ่านรูปจาก public | compact ลดขนาด Logo สำหรับหน้าสมัครสมาชิก
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div className="text-center">
       {/* compact เปลี่ยนเฉพาะขนาด รูปต้นฉบับอยู่ใน public */}
       <img

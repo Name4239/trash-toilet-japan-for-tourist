@@ -1,65 +1,57 @@
-// ลำดับอ่าน 2C: มาจาก server.js ที่ URL /api/places
-// แต่ละบรรทัดเรียงเป็น Route → Auth → Zod Validation → Controller
-// อ่านต่อที่ middlewares/, validations/ แล้วจบที่ controllers/placeController.js
-import express from "express";
-import {
-  createPlace,
-  deletePlace,
-  getNearbyPlaces,
-  getPendingPlaces,
-  getPlaceById,
-  getPlaces,
-  updatePlaceStatus,
-} from "../controllers/placeController.js";
-import {
-  authMiddleware,
-  optionalAuthMiddleware,
-} from "../middlewares/authMiddleware.js";
-import { adminMiddleware } from "../middlewares/adminMiddleware.js";
-import { uploadPlaceImage } from "../middlewares/uploadMiddleware.js";
-import { validate } from "../middlewares/validateMiddleware.js";
-import {
-  createPlaceSchema,
-  nearbyQuerySchema,
-  placeIdSchema,
-  placesQuerySchema,
-  placeStatusSchema,
-} from "../validations/schemas.js";
-
-const router = express.Router();
-
-// Route คำเฉพาะต้องอยู่ก่อน /:id ไม่เช่นนั้น Express จะคิดว่า nearby คือ id
-router.get("/nearby", validate(nearbyQuerySchema, "query"), getNearbyPlaces);
-router.get("/pending", authMiddleware, adminMiddleware, getPendingPlaces);
-
-router.get(
-  "/",
-  optionalAuthMiddleware,
-  validate(placesQuerySchema, "query"),
-  getPlaces
+import express from "express"; // ลำดับอ่าน 2C: มาจาก server.js ที่ URL /api/places | แต่ละบรรทัดเรียงเป็น Route → Auth → Zod Validation → Controller | อ่านต่อที่ middlewares/, validations/ แล้วจบที่ controllers/placeController.js | นำ Express มาใช้สร้าง Router แยกสำหรับ URL กลุ่ม /api/places
+import { // เริ่มรวมรายชื่อฟังก์ชันที่ไฟล์นี้ต้องนำเข้าจากอีก Module
+  createPlace, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  deletePlace, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  getNearbyPlaces, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  getPendingPlaces, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  getPlaceById, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  getPlaces, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  updatePlaceStatus, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+} from "../controllers/placeController.js"; // นำ Controller ของ Place เข้ามาเป็นขั้นตอนสุดท้ายของแต่ละ Route
+import { // เริ่มรวมรายชื่อฟังก์ชันที่ไฟล์นี้ต้องนำเข้าจากอีก Module
+  authMiddleware, // ตรวจ Bearer Token; ไม่ผ่านจะตอบ 401 และไม่ทำขั้นถัดไป
+  optionalAuthMiddleware, // อ่าน Token ถ้ามี เพื่อให้ getPlaces รู้ว่าเป็น Admin แต่คนทั่วไปยังเปิดรายการได้
+} from "../middlewares/authMiddleware.js"; // นำ Middleware ตรวจ Token ทั้งแบบบังคับและแบบไม่บังคับมาใช้
+import { adminMiddleware } from "../middlewares/adminMiddleware.js"; // นำ Middleware ตรวจ role admin มาใช้ป้องกัน Route ฝั่งผู้ดูแล
+import { uploadPlaceImage } from "../middlewares/uploadMiddleware.js"; // นำ Multer middleware สำหรับรับรูป field image มาใช้ก่อนสร้าง Place
+import { validate } from "../middlewares/validateMiddleware.js"; // นำฟังก์ชัน validate มาเชื่อม Zod Schema กับ Request
+import { // เริ่มรวมรายชื่อฟังก์ชันที่ไฟล์นี้ต้องนำเข้าจากอีก Module
+  createPlaceSchema, // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
+  nearbyQuerySchema, // ตรวจ latitude, longitude และ radius
+  placeIdSchema, // ตรวจ :id จาก URL ให้เป็นจำนวนเต็มบวก
+  placesQuerySchema, // ตรวจ type, search และ status ของหน้ารายการ
+  placeStatusSchema, // ตรวจ status ใหม่ตอน Admin อัปเดต
+} from "../validations/schemas.js"; // นำ Schema ของ Place มาใช้ตรวจ body, params และ query ก่อนเข้า Controller
+const router = express.Router(); // สร้าง Router ของ Place เพื่อส่งออกไป mount ที่ /api/places ใน server.js
+router.get("/nearby", validate(nearbyQuerySchema, "query"), getNearbyPlaces); // Route คำเฉพาะต้องอยู่ก่อน /:id ไม่เช่นนั้น Express จะคิดว่า nearby คือ id
+router.get("/pending", authMiddleware, adminMiddleware, getPendingPlaces); // นำ Middleware ตรวจ role admin มาใช้ป้องกัน Route ฝั่งผู้ดูแล
+router.get( // เริ่มประกาศ GET Route สำหรับอ่านข้อมูล Place
+  "/", // รวมกับ /api/places เป็น GET /api/places
+  optionalAuthMiddleware, // อ่าน Token ถ้ามี เพื่อให้ getPlaces รู้ว่าเป็น Admin แต่คนทั่วไปยังเปิดรายการได้
+  validate(placesQuerySchema, "query"), // ตรวจข้อมูลด้วย Zod Schema ที่ระบุ; ไม่ผ่านจะตอบ 400 ก่อน Controller
+  getPlaces // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
 );
-router.get("/:id", validate(placeIdSchema, "params"), getPlaceById);
-router.post(
-  "/",
-  authMiddleware,
-  uploadPlaceImage,
-  validate(createPlaceSchema),
-  createPlace
+router.get("/:id", validate(placeIdSchema, "params"), getPlaceById); // เริ่มประกาศ GET Route สำหรับอ่านข้อมูล Place
+router.post( // เริ่มประกาศ POST Route สำหรับสร้าง Place ใหม่
+  "/", // รวมกับ /api/places เป็น POST /api/places
+  authMiddleware, // ตรวจ Bearer Token; ไม่ผ่านจะตอบ 401 และไม่ทำขั้นถัดไป
+  uploadPlaceImage, // นำ Multer middleware สำหรับรับรูป field image มาใช้ก่อนสร้าง Place
+  validate(createPlaceSchema), // ตรวจข้อมูลด้วย Zod Schema ที่ระบุ; ไม่ผ่านจะตอบ 400 ก่อน Controller
+  createPlace // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
 );
-router.delete(
-  "/:id",
-  authMiddleware,
-  adminMiddleware,
-  validate(placeIdSchema, "params"),
-  deletePlace
+router.delete( // เริ่มประกาศ DELETE Route สำหรับให้ Admin ลบ Place
+  "/:id", // เช่น DELETE /api/places/12 โดย 12 อยู่ใน req.params.id
+  authMiddleware, // ตรวจ Bearer Token; ไม่ผ่านจะตอบ 401 และไม่ทำขั้นถัดไป
+  adminMiddleware, // นำ Middleware ตรวจ role admin มาใช้ป้องกัน Route ฝั่งผู้ดูแล
+  validate(placeIdSchema, "params"), // ตรวจข้อมูลด้วย Zod Schema ที่ระบุ; ไม่ผ่านจะตอบ 400 ก่อน Controller
+  deletePlace // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
 );
-router.patch(
-  "/:id/status",
-  authMiddleware,
-  adminMiddleware,
-  validate(placeIdSchema, "params"),
-  validate(placeStatusSchema),
-  updatePlaceStatus
+router.patch( // เริ่มประกาศ PATCH Route สำหรับให้ Admin เปลี่ยนสถานะ Place
+  "/:id/status", // เช่น PATCH /api/places/12/status
+  authMiddleware, // ตรวจ Bearer Token; ไม่ผ่านจะตอบ 401 และไม่ทำขั้นถัดไป
+  adminMiddleware, // นำ Middleware ตรวจ role admin มาใช้ป้องกัน Route ฝั่งผู้ดูแล
+  validate(placeIdSchema, "params"), // ตรวจข้อมูลด้วย Zod Schema ที่ระบุ; ไม่ผ่านจะตอบ 400 ก่อน Controller
+  validate(placeStatusSchema), // ตรวจข้อมูลด้วย Zod Schema ที่ระบุ; ไม่ผ่านจะตอบ 400 ก่อน Controller
+  updatePlaceStatus // เรียก Controller นี้เป็นขั้นตอนสุดท้ายเมื่อ Middleware ก่อนหน้าผ่านทั้งหมด
 );
-
-export default router;
+export default router; // ส่ง Router ออกไปให้ server.js import และ mount ใช้งาน

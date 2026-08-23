@@ -1,6 +1,4 @@
-/* ลำดับอ่าน Frontend 5: Tailwind theme และ CSS กลางของ Light/Dark/Leaflet */
-/* หน้าใช้ Tailwind ส่วนไฟล์นี้ดูแลสีร่วมและกรณีพิเศษของธีมมืด */
-@import "tailwindcss";
+@import "tailwindcss"; /* ลำดับอ่าน Frontend 5: Tailwind theme และ CSS กลางของ Light/Dark/Leaflet | หน้าใช้ Tailwind ส่วนไฟล์นี้ดูแลสีร่วมและกรณีพิเศษของธีมมืด */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -29,8 +27,7 @@ body {
   font-family: var(--font-sans);
 }
 
-/* ธีมมืดใช้สีเทาอุ่น ไม่ใช้ดำสนิท เพื่อลดความต่างของแสง */
-html.dark body {
+html.dark body { /* ธีมมืดใช้สีเทาอุ่น ไม่ใช้ดำสนิท เพื่อลดความต่างของแสง */
   background: #171614;
   color: #e8e1d7;
   color-scheme: dark;
@@ -70,8 +67,7 @@ html.dark .leaflet-control,
 html.dark .leaflet-popup-content-wrapper,
 html.dark .leaflet-popup-tip { background: #302d29; color: #eee7dc; }
 
-/* Login/Register มีภาพพื้นหลังสว่าง จึงกำหนดกล่องฟอร์มโหมดมืดแยกให้ชัด */
-html.dark .auth-panel {
+html.dark .auth-panel { /* Login/Register มีภาพพื้นหลังสว่าง จึงกำหนดกล่องฟอร์มโหมดมืดแยกให้ชัด */
   background: rgb(37 34 31 / 94%) !important;
   color: #f3ece2;
 }

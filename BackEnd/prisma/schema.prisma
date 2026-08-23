@@ -1,16 +1,10 @@
-// ลำดับอ่าน 6: อ่านไฟล์นี้เพื่อเข้าใจโครงสร้าง Database หลังดู Controller
-// User เชื่อม Place และ Report แบบ 1:N ผ่าน createdById/reporterId
-// เมื่อแก้ไฟล์นี้ ต้องรัน prisma migrate และ prisma generate ก่อนใช้โค้ดใหม่
-
-generator client {
-  // สร้าง Prisma Client ให้ JavaScript import ไปใช้ใน src/lib/prisma.js
-  provider = "prisma-client-js"
+generator client { // ลำดับอ่าน 6: อ่านไฟล์นี้เพื่อเข้าใจโครงสร้าง Database หลังดู Controller | User เชื่อม Place และ Report แบบ 1:N ผ่าน createdById/reporterId | เมื่อแก้ไฟล์นี้ ต้องรัน prisma migrate และ prisma generate ก่อนใช้โค้ดใหม่
+  provider = "prisma-client-js" // สร้าง Prisma Client ให้ JavaScript import ไปใช้ใน src/lib/prisma.js
   output   = "../generated/prisma"
 }
 
 datasource db {
-  // MariaDB ใช้ connector เดียวกับ MySQL
-  provider = "mysql"
+  provider = "mysql" // MariaDB ใช้ connector เดียวกับ MySQL
 }
 
 enum UserRole {
@@ -37,8 +31,7 @@ enum ReportStatus {
 }
 
 model User {
-  // User หนึ่งคนสร้าง Place และ Report ได้หลายรายการ
-  id        Int      @id @default(autoincrement())
+  id        Int      @id @default(autoincrement()) // User หนึ่งคนสร้าง Place และ Report ได้หลายรายการ
   name      String
   email     String   @unique
   password  String
@@ -51,8 +44,7 @@ model User {
 }
 
 model Place {
-  // createdById เป็น Foreign Key ที่ชี้กลับไปยัง User
-  id          Int         @id @default(autoincrement())
+  id          Int         @id @default(autoincrement()) // createdById เป็น Foreign Key ที่ชี้กลับไปยัง User
   name        String
   type        PlaceType
   address     String
@@ -73,8 +65,7 @@ model Place {
 }
 
 model Report {
-  // Report เชื่อมทั้ง User ผู้รายงานและ Place ที่ถูกรายงาน
-  id               Int          @id @default(autoincrement())
+  id               Int          @id @default(autoincrement()) // Report เชื่อมทั้ง User ผู้รายงานและ Place ที่ถูกรายงาน
   reason           String
   description      String?
   evidenceImageUrl String?

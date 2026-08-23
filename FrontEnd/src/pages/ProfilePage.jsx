@@ -1,53 +1,46 @@
-// แสดง User พร้อม Avatar, Theme, Admin link และ Logout
-// เปลี่ยน Avatar แล้ว reloadUser เพื่ออ่านค่าล่าสุดจาก Backend
-import { Camera, LogOut, Moon, ShieldCheck, Sun, UserRound } from "lucide-react";
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PageHeader from "../components/PageHeader.jsx";
-import { Button } from "../components/ui.jsx";
-import useAuth from "../hooks/useAuth.js";
-import useTheme from "../hooks/useTheme.js";
-import api, { getAssetUrl, getErrorMessage } from "../services/api.js";
+import { Camera, LogOut, Moon, ShieldCheck, Sun, UserRound } from "lucide-react"; // แสดง User พร้อม Avatar, Theme, Admin link และ Logout | เปลี่ยน Avatar แล้ว reloadUser เพื่ออ่านค่าล่าสุดจาก Backend
+import { useRef, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useNavigate } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PageHeader from "../components/PageHeader.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import useAuth from "../hooks/useAuth.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import useTheme from "../hooks/useTheme.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api, { getAssetUrl, getErrorMessage } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function ProfilePage() {
-  // ดึงข้อมูลจาก AuthProvider/ThemeProvider แทนการเรียก API ซ้ำเอง
-  const { user, logout, reloadUser } = useAuth();
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-  // ref ใช้เปิด input ที่ซ่อนไว้เมื่อผู้ใช้แตะรูป Avatar
-  const fileInputRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
+export default function ProfilePage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const { user, logout, reloadUser } = useAuth(); // ดึงข้อมูลจาก AuthProvider/ThemeProvider แทนการเรียก API ซ้ำเอง
+  const navigate = useNavigate(); // อ่านค่าจาก React Hook ที่ Component ต้องใช้ในรอบ render นี้
+  const { theme, setTheme } = useTheme(); // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+  const fileInputRef = useRef(null); // ref ใช้เปิด input ที่ซ่อนไว้เมื่อผู้ใช้แตะรูป Avatar
+  const [uploading, setUploading] = useState(false); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [message, setMessage] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
 
-  function handleLogout() {
-    // ล้าง Token ก่อนพาไปหน้า Login
-    logout();
-    navigate("/login");
+  function handleLogout() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    logout(); // ล้าง Token ก่อนพาไปหน้า Login
+    navigate("/login"); // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
   }
 
-  async function handleAvatarChange(event) {
-    // รับไฟล์จากกล้อง/คลังรูป แล้วส่งเป็น multipart/form-data
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function handleAvatarChange(event) { // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
+    const file = event.target.files?.[0]; // รับไฟล์จากกล้อง/คลังรูป แล้วส่งเป็น multipart/form-data
+    if (!file) return; // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
 
-    setUploading(true);
-    setMessage("");
-    try {
-      const formData = new FormData();
+    setUploading(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setMessage(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    try { // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
+      const formData = new FormData(); // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
       formData.append("avatar", file);
-      await api.patch("/users/me/avatar", formData);
-      // โหลด /users/me ใหม่เพื่อให้ avatarUrl บนหน้าจอเป็นค่าล่าสุด
-      await reloadUser();
-      setMessage("เปลี่ยนรูปโปรไฟล์สำเร็จ");
+      await api.patch("/users/me/avatar", formData); // รอ Promise นี้ทำงานเสร็จก่อนใช้ผลลัพธ์หรือทำบรรทัดถัดไป
+      await reloadUser(); // โหลด /users/me ใหม่เพื่อให้ avatarUrl บนหน้าจอเป็นค่าล่าสุด
+      setMessage("เปลี่ยนรูปโปรไฟล์สำเร็จ"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     } catch (requestError) {
-      setMessage(getErrorMessage(requestError));
+      setMessage(getErrorMessage(requestError)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     } finally {
-      setUploading(false);
+      setUploading(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       event.target.value = "";
     }
   }
 
-  return (
+  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div>
       <PageHeader title="โปรไฟล์" />
       <section className="px-5 py-8 text-center">
