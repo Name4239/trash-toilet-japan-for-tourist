@@ -1,35 +1,58 @@
-import { useState } from "react"; // ลำดับอ่าน Page 1: รับ email/password แล้วเรียก AuthProvider | สำเร็จแล้ว Member ไป Map ส่วน Admin ไปหน้าจัดการ
-import { Link, Navigate, useNavigate } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import BrandMark from "../components/BrandMark.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Button, Field } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import useAuth from "../hooks/useAuth.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { getErrorMessage } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useState } from "react";
+// ลำดับอ่าน Page 1: รับ email/password แล้วเรียก AuthProvider | สำเร็จแล้ว Member ไป Map ส่วน Admin ไปหน้าจัดการ
+import { Link, Navigate, useNavigate } from "react-router-dom";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import BrandMark from "../components/BrandMark.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button, Field } from "../components/ui.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import useAuth from "../hooks/useAuth.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { getErrorMessage } from "../services/api.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function LoginPage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const { user, login } = useAuth(); // AuthProvider ทำงาน Login ส่วน Page นี้ดูแล Form และการเปลี่ยนหน้า
-  const navigate = useNavigate(); // อ่านค่าจาก React Hook ที่ Component ต้องใช้ในรอบ render นี้
-  const [form, setForm] = useState({ email: "", password: "" }); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [error, setError] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [submitting, setSubmitting] = useState(false); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+export default function LoginPage() {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const { user, login } = useAuth();
+  // AuthProvider ทำงาน Login ส่วน Page นี้ดูแล Form และการเปลี่ยนหน้า
+  const navigate = useNavigate();
+  // อ่านค่าจาก React Hook ที่ Component ต้องใช้ในรอบ render นี้
+  const [form, setForm] = useState({ email: "", password: "" });
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [error, setError] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [submitting, setSubmitting] = useState(false);
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
 
-  if (user) return <Navigate to={user.role === "admin" ? "/admin/places" : "/"} replace />; // ถ้า Login อยู่แล้วไม่ควรเห็นหน้านี้ จึงส่งไปหน้าตาม role ทันที
+  if (user) return <Navigate to={user.role === "admin" ? "/admin/places" : "/"} replace />;
+  // ถ้า Login อยู่แล้วไม่ควรเห็นหน้านี้ จึงส่งไปหน้าตาม role ทันที
 
-  async function handleSubmit(event) { // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
-    event.preventDefault(); // ปิดการ Submit แบบ HTML แล้วเรียก API ผ่าน login() แทน
-    setSubmitting(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    setError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+  async function handleSubmit(event) {
+  // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
+    event.preventDefault();
+    // ปิดการ Submit แบบ HTML แล้วเรียก API ผ่าน login() แทน
+    setSubmitting(true);
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setError("");
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
 
-    try { // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
-      const loggedInUser = await login(form.email, form.password); // login คืน User ทำให้รู้ว่าควรพาไปหน้า Member หรือ Admin
-      navigate(loggedInUser?.role === "admin" ? "/admin/places" : "/"); // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
+    try {
+    // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
+      const loggedInUser = await login(form.email, form.password);
+      // login คืน User ทำให้รู้ว่าควรพาไปหน้า Member หรือ Admin
+      navigate(loggedInUser?.role === "admin" ? "/admin/places" : "/");
+      // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
     } catch (requestError) {
-      setError(getErrorMessage(requestError)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setError(getErrorMessage(requestError));
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     } finally {
-      setSubmitting(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setSubmitting(false);
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     }
   }
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div className="relative mx-auto flex min-h-screen max-w-md flex-col overflow-hidden bg-cream-50 px-5 py-8 shadow-2xl">
       <div className="absolute inset-0 bg-[url('/auth-background.png')] bg-cover bg-center" />
       <div className="absolute inset-0 bg-white/15" />

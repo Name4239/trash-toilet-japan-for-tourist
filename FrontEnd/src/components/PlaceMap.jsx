@@ -1,24 +1,39 @@
-import L from "leaflet"; // รับ places จาก MapHomePage แล้ววาด Base Map, Marker และตำแหน่งผู้ใช้ | OpenStreetMap เป็นพื้นแผนที่ ส่วน Marker มาจาก Backend/Database
-import { Trash2, Toilet } from "lucide-react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { createRoot } from "react-dom/client"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Link } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { getAssetUrl } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import L from "leaflet";
+// รับ places จาก MapHomePage แล้ววาด Base Map, Marker และตำแหน่งผู้ใช้ | OpenStreetMap เป็นพื้นแผนที่ ส่วน Marker มาจาก Backend/Database
+import { Trash2, Toilet } from "lucide-react";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { createRoot } from "react-dom/client";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Link } from "react-router-dom";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { getAssetUrl } from "../services/api.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-function RecenterMap({ center }) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const map = useMap(); // useMap เข้าถึง Leaflet Map ที่ถูกสร้างโดย MapContainer
-  map.setView(center, map.getZoom()); // เปลี่ยนจุดกึ่งกลาง แต่รักษาระดับ Zoom ปัจจุบันไว้
-  return null; // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+function RecenterMap({ center }) {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const map = useMap();
+  // useMap เข้าถึง Leaflet Map ที่ถูกสร้างโดย MapContainer
+  map.setView(center, map.getZoom());
+  // เปลี่ยนจุดกึ่งกลาง แต่รักษาระดับ Zoom ปัจจุบันไว้
+  return null;
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
 }
 
-function markerIcon(type) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const color = type === "toilet" ? "#3f7ee8" : "#ff8518"; // ห้องน้ำใช้สีน้ำเงิน ถังขยะใช้สีส้ม
-  const Icon = type === "toilet" ? Toilet : Trash2; // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
-  const iconElement = document.createElement("div"); // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+function markerIcon(type) {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const color = type === "toilet" ? "#3f7ee8" : "#ff8518";
+  // ห้องน้ำใช้สีน้ำเงิน ถังขยะใช้สีส้ม
+  const Icon = type === "toilet" ? Toilet : Trash2;
+  // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+  const iconElement = document.createElement("div");
+  // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
   iconElement.style.cssText = `display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:${color};border:3px solid white;box-shadow:0 4px 12px rgba(63,56,47,.28)`;
   createRoot(iconElement).render(<Icon color="white" size={23} strokeWidth={2.5} />);
 
-  return L.divIcon({ // แปลง HTML ที่สร้างเป็น Leaflet divIcon สำหรับ Marker
+  return L.divIcon({
+  // แปลง HTML ที่สร้างเป็น Leaflet divIcon สำหรับ Marker
     className: "",
     html: iconElement,
     iconSize: [38, 38],
@@ -27,10 +42,13 @@ function markerIcon(type) { // ประกาศฟังก์ชันนี�
   });
 }
 
-const userIcon = L.divIcon({ className: "", html: '<div class="map-dot" style="width:18px;height:18px;background:#4faf6a"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }); // จุดสีเขียวนี้แทนตำแหน่ง GPS ของผู้ใช้ ไม่ใช่ Place จาก Database
+const userIcon = L.divIcon({ className: "", html: '<div class="map-dot" style="width:18px;height:18px;background:#4faf6a"></div>', iconSize: [18, 18], iconAnchor: [9, 9] });
+// จุดสีเขียวนี้แทนตำแหน่ง GPS ของผู้ใช้ ไม่ใช่ Place จาก Database
 
-export default function PlaceMap({ places, position }) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+export default function PlaceMap({ places, position }) {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <MapContainer center={position} zoom={14} zoomControl={false}>
       {/* TileLayer คือภาพพื้นแผนที่จาก OpenStreetMap */}
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

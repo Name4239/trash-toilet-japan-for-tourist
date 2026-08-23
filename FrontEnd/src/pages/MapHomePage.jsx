@@ -1,14 +1,24 @@
-import { LoaderCircle, LocateFixed } from "lucide-react"; // หน้าแรกหลัง Login: โหลด Place active แล้วส่งให้ PlaceMap วาด Marker | react-geolocated อ่านตำแหน่งจริงเพื่อให้แผนที่ตามผู้ใช้
-import { useEffect, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { useGeolocated } from "react-geolocated"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import PlaceMap from "../components/PlaceMap.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Chip } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import api from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { LoaderCircle, LocateFixed } from "lucide-react";
+// หน้าแรกหลัง Login: โหลด Place active แล้วส่งให้ PlaceMap วาด Marker | react-geolocated อ่านตำแหน่งจริงเพื่อให้แผนที่ตามผู้ใช้
+import { useEffect, useState } from "react";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useGeolocated } from "react-geolocated";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PlaceMap from "../components/PlaceMap.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Chip } from "../components/ui.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api from "../services/api.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function MapHomePage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const [places, setPlaces] = useState([]); // places มาจาก Database ส่วน type คือ Filter ปัจจุบัน
-  const [type, setType] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const { // Hook นี้ขอ GPS อัตโนมัติเมื่อเปิดหน้า และคืน coords/error
+export default function MapHomePage() {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const [places, setPlaces] = useState([]);
+  // places มาจาก Database ส่วน type คือ Filter ปัจจุบัน
+  const [type, setType] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const {
+  // Hook นี้ขอ GPS อัตโนมัติเมื่อเปิดหน้า และคืน coords/error
     coords,
     getPosition,
     positionError,
@@ -20,17 +30,22 @@ export default function MapHomePage() { // ประกาศฟังก์ช�
     userDecisionTimeout: 12000,
   });
 
-  useEffect(() => { // กำหนด Side effect ให้ทำงานเมื่อ Component render และ Dependency เปลี่ยน
-    api.get("/places", { params: type ? { type } : {} }) // โหลด Place ใหม่ทุกครั้งที่ผู้ใช้เปลี่ยนประเภท
+  useEffect(() => {
+  // กำหนด Side effect ให้ทำงานเมื่อ Component render และ Dependency เปลี่ยน
+    api.get("/places", { params: type ? { type } : {} })
+    // โหลด Place ใหม่ทุกครั้งที่ผู้ใช้เปลี่ยนประเภท
       .then((response) => setPlaces(response.data.places))
       .catch(() => {
-        setPlaces([]); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+        setPlaces([]);
+        // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       });
   }, [type]);
 
-  const position = coords ? [coords.latitude, coords.longitude] : null; // React Leaflet รับพิกัดในรูป Array [latitude, longitude]
+  const position = coords ? [coords.latitude, coords.longitude] : null;
+  // React Leaflet รับพิกัดในรูป Array [latitude, longitude]
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div className="relative h-[calc(100vh-4rem)] min-h-[620px] overflow-hidden md:h-[calc(100vh-7rem)]">
       <div className="absolute inset-0 bg-cream-100">
         {/* ยังไม่มี GPS จะแสดง Loading/Error แทนการสร้าง Map ด้วย center ว่าง */}

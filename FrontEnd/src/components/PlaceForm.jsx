@@ -1,81 +1,125 @@
-import { Camera, LocateFixed } from "lucide-react"; // ฟอร์มเพิ่ม Place ที่ Member และ Admin ใช้ร่วมกัน | รับรูป GPS ที่อยู่ แล้วส่งข้อมูลกลับ AddPlacePage ผ่าน onSubmit
-import { useEffect, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { useGeolocated } from "react-geolocated"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Button, Chip, Field, Textarea } from "./ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import PlaceMap from "./PlaceMap.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { reverseGeocode } from "../services/locationService.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Camera, LocateFixed } from "lucide-react";
+// ฟอร์มเพิ่ม Place ที่ Member และ Admin ใช้ร่วมกัน | รับรูป GPS ที่อยู่ แล้วส่งข้อมูลกลับ AddPlacePage ผ่าน onSubmit
+import { useEffect, useState } from "react";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useGeolocated } from "react-geolocated";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button, Chip, Field, Textarea } from "./ui.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PlaceMap from "./PlaceMap.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { reverseGeocode } from "../services/locationService.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function PlaceForm({ onSubmit, submitLabel = "เพิ่มสถานที่" }) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const [form, setForm] = useState({ name: "", address: "", type: "toilet", description: "", latitude: "", longitude: "" }); // form เก็บค่าข้อความ/พิกัดทั้งหมดที่ผู้ใช้กรอก
+export default function PlaceForm({ onSubmit, submitLabel = "เพิ่มสถานที่" }) {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const [form, setForm] = useState({ name: "", address: "", type: "toilet", description: "", latitude: "", longitude: "" });
+  // form เก็บค่าข้อความ/พิกัดทั้งหมดที่ผู้ใช้กรอก
 
-  const [image, setImage] = useState(null); // กลุ่ม State ของรูป: ไฟล์จริงใช้ส่ง API ส่วน Preview ใช้แสดงบนหน้าจอ
-  const [imagePreview, setImagePreview] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [imageError, setImageError] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [addressLoading, setAddressLoading] = useState(false); // กลุ่ม State ของ GPS และการค้นหาที่อยู่
-  const [locationError, setLocationError] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const { coords, getPosition, isGeolocationEnabled } = useGeolocated({ positionOptions: { enableHighAccuracy: true }, userDecisionTimeout: 10000, suppressLocationOnMount: true }); // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
+  const [image, setImage] = useState(null);
+  // กลุ่ม State ของรูป: ไฟล์จริงใช้ส่ง API ส่วน Preview ใช้แสดงบนหน้าจอ
+  const [imagePreview, setImagePreview] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [imageError, setImageError] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [addressLoading, setAddressLoading] = useState(false);
+  // กลุ่ม State ของ GPS และการค้นหาที่อยู่
+  const [locationError, setLocationError] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const { coords, getPosition, isGeolocationEnabled } = useGeolocated({ positionOptions: { enableHighAccuracy: true }, userDecisionTimeout: 10000, suppressLocationOnMount: true });
+  // ประกาศค่าที่ใช้ภายในขอบเขตนี้และไม่อนุญาตให้เปลี่ยนตัวแปรไปอ้างค่าใหม่
 
-  useEffect(() => { // Effect นี้ทำงานหลัง react-geolocated ส่ง coords ค่าใหม่กลับมา
-    if (!coords) return; // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+  useEffect(() => {
+  // Effect นี้ทำงานหลัง react-geolocated ส่ง coords ค่าใหม่กลับมา
+    if (!coords) return;
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
 
-    const controller = new AbortController(); // AbortController ยกเลิก Request เก่าเมื่อ Component ปิดหรือพิกัดเปลี่ยน
-    setAddressLoading(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    setLocationError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    const controller = new AbortController();
+    // AbortController ยกเลิก Request เก่าเมื่อ Component ปิดหรือพิกัดเปลี่ยน
+    setAddressLoading(true);
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setLocationError("");
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
 
-    setForm((current) => ({ // ใส่พิกัดทันที แล้วค่อยเติมที่อยู่เมื่อ Nominatim ตอบกลับ
+    setForm((current) => ({
+    // ใส่พิกัดทันที แล้วค่อยเติมที่อยู่เมื่อ Nominatim ตอบกลับ
       ...current,
       latitude: coords.latitude,
       longitude: coords.longitude,
     }));
 
-    reverseGeocode(coords.latitude, coords.longitude, controller.signal) // ส่งพิกัดไปแปลงเป็นข้อความที่อยู่ แล้วเติมกลับเข้า form
+    reverseGeocode(coords.latitude, coords.longitude, controller.signal)
+    // ส่งพิกัดไปแปลงเป็นข้อความที่อยู่ แล้วเติมกลับเข้า form
       .then((address) => {
-        setForm((current) => ({ ...current, address })); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+        setForm((current) => ({ ...current, address }));
+        // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       })
       .catch((error) => {
-        if (error.name !== "AbortError") { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
-          setLocationError("ได้พิกัดแล้ว แต่ค้นหาที่อยู่ไม่สำเร็จ กรุณากรอกเอง"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+        if (error.name !== "AbortError") {
+        // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+          setLocationError("ได้พิกัดแล้ว แต่ค้นหาที่อยู่ไม่สำเร็จ กรุณากรอกเอง");
+          // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
         }
       })
       .finally(() => setAddressLoading(false));
 
-    return () => controller.abort(); // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+    return () => controller.abort();
+    // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
   }, [coords]);
 
-  function requestCurrentPosition() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-    getPosition(); // เปิดคำขอ GPS ของ Browser; coords จะอัปเดตภายหลังแบบ asynchronous
-    if (coords) setForm((current) => ({ ...current, latitude: coords.latitude, longitude: coords.longitude })); // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+  function requestCurrentPosition() {
+  // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    getPosition();
+    // เปิดคำขอ GPS ของ Browser; coords จะอัปเดตภายหลังแบบ asynchronous
+    if (coords) setForm((current) => ({ ...current, latitude: coords.latitude, longitude: coords.longitude }));
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
   }
 
-  function applyCoordinates() { // react-geolocated อัปเดต coords หลังผู้ใช้อนุญาต จึงมีปุ่มอีกครั้งเพื่อใส่ค่าล่าสุด
-    requestCurrentPosition(); // ขอพิกัดใหม่ทุกครั้งที่กด เผื่อผู้ใช้เคลื่อนที่จากตำแหน่งเดิม
+  function applyCoordinates() {
+  // react-geolocated อัปเดต coords หลังผู้ใช้อนุญาต จึงมีปุ่มอีกครั้งเพื่อใส่ค่าล่าสุด
+    requestCurrentPosition();
+    // ขอพิกัดใหม่ทุกครั้งที่กด เผื่อผู้ใช้เคลื่อนที่จากตำแหน่งเดิม
 
-    if (coords) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
-      setForm((current) => ({ ...current, latitude: coords.latitude, longitude: coords.longitude })); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    if (coords) {
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+      setForm((current) => ({ ...current, latitude: coords.latitude, longitude: coords.longitude }));
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     }
   }
 
-  function chooseImage(event) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-    const selectedImage = event.target.files?.[0]; // อ่านไฟล์แรกจาก input และสร้าง URL ชั่วคราวสำหรับ Preview
-    if (!selectedImage) return; // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+  function chooseImage(event) {
+  // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    const selectedImage = event.target.files?.[0];
+    // อ่านไฟล์แรกจาก input และสร้าง URL ชั่วคราวสำหรับ Preview
+    if (!selectedImage) return;
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
 
-    setImage(selectedImage); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    setImagePreview(URL.createObjectURL(selectedImage)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    setImageError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setImage(selectedImage);
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setImagePreview(URL.createObjectURL(selectedImage));
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setImageError("");
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
   }
 
-  function handleSubmit(event) { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-    event.preventDefault(); // ป้องกัน Browser reload หน้าเมื่อกด Submit
+  function handleSubmit(event) {
+  // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+    event.preventDefault();
+    // ป้องกัน Browser reload หน้าเมื่อกด Submit
 
-    if (!image) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
-      setImageError("กรุณาถ่ายหรือเลือกรูปสถานที่"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    if (!image) {
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+      setImageError("กรุณาถ่ายหรือเลือกรูปสถานที่");
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       return;
     }
 
-    onSubmit({ ...form, image }); // ส่งข้อมูลกลับ Parent (AddPlacePage) ซึ่งเป็นผู้สร้าง FormData และเรียก API
+    onSubmit({ ...form, image });
+    // ส่งข้อมูลกลับ Parent (AddPlacePage) ซึ่งเป็นผู้สร้าง FormData และเรียก API
   }
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <form className="space-y-4" onSubmit={handleSubmit}>
       {/* ส่วน Map/GPS ใช้เลือกพิกัดปัจจุบัน */}
       <div className="relative h-44 overflow-hidden rounded-2xl bg-cream-100 text-center">

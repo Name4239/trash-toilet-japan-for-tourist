@@ -1,35 +1,57 @@
-import { useState } from "react"; // ส่ง name/email/password ไป POST /api/auth/register | สมัครสำเร็จจะกลับ Login เพื่อเข้าสู่ระบบ
-import { Link, useNavigate } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import BrandMark from "../components/BrandMark.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Button, Field } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import api, { getErrorMessage } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useState } from "react";
+// ส่ง name/email/password ไป POST /api/auth/register | สมัครสำเร็จจะกลับ Login เพื่อเข้าสู่ระบบ
+import { Link, useNavigate } from "react-router-dom";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import BrandMark from "../components/BrandMark.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button, Field } from "../components/ui.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api, { getErrorMessage } from "../services/api.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function RegisterPage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const navigate = useNavigate(); // form เก็บข้อมูลสี่ช่อง ส่วน Backend รับเฉพาะ name/email/password
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" }); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [error, setError] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [submitting, setSubmitting] = useState(false); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+export default function RegisterPage() {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const navigate = useNavigate();
+  // form เก็บข้อมูลสี่ช่อง ส่วน Backend รับเฉพาะ name/email/password
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [error, setError] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [submitting, setSubmitting] = useState(false);
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
 
-  async function handleSubmit(event) { // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
-    event.preventDefault(); // ตรวจยืนยันรหัสผ่านที่ Frontend ก่อน เพราะ Backend ไม่มี confirmPassword
-    if (form.password !== form.confirmPassword) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
-      setError("รหัสผ่านไม่ตรงกัน"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+  async function handleSubmit(event) {
+  // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
+    event.preventDefault();
+    // ตรวจยืนยันรหัสผ่านที่ Frontend ก่อน เพราะ Backend ไม่มี confirmPassword
+    if (form.password !== form.confirmPassword) {
+    // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+      setError("รหัสผ่านไม่ตรงกัน");
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
       return;
     }
 
-    setSubmitting(true); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    setError(""); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
-    try { // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
-      await api.post("/auth/register", { name: form.name, email: form.email, password: form.password }); // ส่ง JSON ไป Register API แล้วนำไปหน้า Login เมื่อสำเร็จ
-      navigate("/login", { state: { message: "สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ" } }); // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
+    setSubmitting(true);
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    setError("");
+    // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+    try {
+    // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
+      await api.post("/auth/register", { name: form.name, email: form.email, password: form.password });
+      // ส่ง JSON ไป Register API แล้วนำไปหน้า Login เมื่อสำเร็จ
+      navigate("/login", { state: { message: "สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ" } });
+      // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
     } catch (requestError) {
-      setError(getErrorMessage(requestError)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setError(getErrorMessage(requestError));
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     } finally {
-      setSubmitting(false); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setSubmitting(false);
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     }
   }
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div className="relative mx-auto min-h-screen max-w-md overflow-hidden bg-cream-50 px-5 py-6 shadow-2xl">
       <div className="absolute inset-0 bg-[url('/auth-background.png')] bg-cover bg-center" />
       <div className="absolute inset-0 bg-white/15" />

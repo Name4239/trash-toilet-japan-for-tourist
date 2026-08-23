@@ -1,11 +1,17 @@
-import { ClipboardList, FileWarning, House, MapPinPlus, Search, UserRound } from "lucide-react"; // เมนูด้านล่าง เลือกรายการต่างกันตาม role member/admin | AppLayout วาง Component นี้ใต้หน้าปัจจุบัน
-import { NavLink } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import useAuth from "../hooks/useAuth.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { ClipboardList, FileWarning, House, MapPinPlus, Search, UserRound } from "lucide-react";
+// เมนูด้านล่าง เลือกรายการต่างกันตาม role member/admin | AppLayout วาง Component นี้ใต้หน้าปัจจุบัน
+import { NavLink } from "react-router-dom";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import useAuth from "../hooks/useAuth.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function BottomNav() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const { user } = useAuth(); // อ่าน User จาก Context เพราะ role เป็นตัวตัดสินว่าจะใช้เมนูชุดใด
+export default function BottomNav() {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const { user } = useAuth();
+  // อ่าน User จาก Context เพราะ role เป็นตัวตัดสินว่าจะใช้เมนูชุดใด
 
-  const links = user?.role === "admin" // Admin มี 5 เมนู ส่วน Member มี 4 เมนู
+  const links = user?.role === "admin"
+  // Admin มี 5 เมนู ส่วน Member มี 4 เมนู
     ? [
         { to: "/admin/add-place", label: "เพิ่ม", icon: MapPinPlus },
         { to: "/admin/places", label: "สถานที่", icon: Search },
@@ -20,7 +26,8 @@ export default function BottomNav() { // ประกาศฟังก์ชั
         { to: "/profile", label: "โปรไฟล์", icon: UserRound },
       ];
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     // sticky ทำให้เมนูติดอยู่ด้านล่างขณะเลื่อนหน้า
     <nav className={`sticky bottom-0 z-[1000] grid border-t border-cream-200 bg-white/95 backdrop-blur ${links.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
       {/* วนข้อมูล links เพื่อสร้างปุ่ม โดย NavLink บอกได้ว่าปุ่มใดกำลัง active */}

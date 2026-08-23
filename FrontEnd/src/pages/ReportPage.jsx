@@ -1,41 +1,66 @@
-import { Camera } from "lucide-react"; // รับ Place id จาก URL แล้วส่งเหตุผลไป POST /api/reports | Backend บังคับ Report ใหม่เป็น pending เพื่อรอ Admin
-import { useEffect, useState } from "react"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { useNavigate, useParams } from "react-router-dom"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import PageHeader from "../components/PageHeader.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import { Button, Chip, Textarea } from "../components/ui.jsx"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
-import api, { getErrorMessage } from "../services/api.js"; // นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Camera } from "lucide-react";
+// รับ Place id จาก URL แล้วส่งเหตุผลไป POST /api/reports | Backend บังคับ Report ใหม่เป็น pending เพื่อรอ Admin
+import { useEffect, useState } from "react";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { useNavigate, useParams } from "react-router-dom";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import PageHeader from "../components/PageHeader.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import { Button, Chip, Textarea } from "../components/ui.jsx";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
+import api, { getErrorMessage } from "../services/api.js";
+// นำ Dependency หรือ Module ที่บรรทัดถัดไปต้องใช้เข้ามาในไฟล์
 
-export default function ReportPage() { // ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
-  const { id } = useParams(); // id มาจาก URL /places/:id/report และใช้เชื่อม Report กับ Place
-  const navigate = useNavigate(); // อ่านค่าจาก React Hook ที่ Component ต้องใช้ในรอบ render นี้
-  const [reason, setReason] = useState("wrong_info"); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [description, setDescription] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [error, setError] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [evidence, setEvidence] = useState(null); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
-  const [preview, setPreview] = useState(""); // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+export default function ReportPage() {
+// ประกาศฟังก์ชันนี้และกำหนดขอบเขตงานตามชื่อของฟังก์ชัน
+  const { id } = useParams();
+  // id มาจาก URL /places/:id/report และใช้เชื่อม Report กับ Place
+  const navigate = useNavigate();
+  // อ่านค่าจาก React Hook ที่ Component ต้องใช้ในรอบ render นี้
+  const [reason, setReason] = useState("wrong_info");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [description, setDescription] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [error, setError] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [evidence, setEvidence] = useState(null);
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
+  const [preview, setPreview] = useState("");
+  // สร้าง State และฟังก์ชันเปลี่ยนค่าเพื่อให้ React render ใหม่เมื่อข้อมูลเปลี่ยน
 
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]); // ลบ Preview URL ออกจากหน่วยความจำเมื่อเปลี่ยนรูปหรือปิดหน้า
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  // ลบ Preview URL ออกจากหน่วยความจำเมื่อเปลี่ยนรูปหรือปิดหน้า
 
-  async function submit(event) { // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
-    event.preventDefault(); // Report บังคับรูปหลักฐานก่อนสร้าง FormData
-    try { // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
-      if (!evidence) { // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
-        setError("กรุณาแนบรูปหลักฐาน"); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+  async function submit(event) {
+  // สร้างฟังก์ชัน async เพื่อให้ใช้ await กับงาน API หรือ Database ได้
+    event.preventDefault();
+    // Report บังคับรูปหลักฐานก่อนสร้าง FormData
+    try {
+    // เริ่มดักงานที่อาจเกิด Error เพื่อจัดการผลลัพธ์อย่างควบคุม
+      if (!evidence) {
+      // ตรวจเงื่อนไขก่อนอนุญาตให้โค้ดภายในทำงาน
+        setError("กรุณาแนบรูปหลักฐาน");
+        // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
         return;
       }
-      const formData = new FormData(); // ชื่อ field ต้องตรงกับ uploadReportEvidence และ createReportSchema
+      const formData = new FormData();
+      // ชื่อ field ต้องตรงกับ uploadReportEvidence และ createReportSchema
       formData.append("placeId", id);
       formData.append("reason", reason);
       formData.append("description", description);
       formData.append("evidence", evidence);
-      await api.post("/reports", formData); // รอ Promise นี้ทำงานเสร็จก่อนใช้ผลลัพธ์หรือทำบรรทัดถัดไป
-      navigate(`/places/${id}`); // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
+      await api.post("/reports", formData);
+      // รอ Promise นี้ทำงานเสร็จก่อนใช้ผลลัพธ์หรือทำบรรทัดถัดไป
+      navigate(`/places/${id}`);
+      // เปลี่ยน URL และนำผู้ใช้ไปยังหน้าที่กำหนด
     } catch (requestError) {
-      setError(getErrorMessage(requestError)); // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
+      setError(getErrorMessage(requestError));
+      // อัปเดต React State เพื่อให้หน้าจอ render ตามข้อมูลล่าสุด
     }
   }
 
-  return ( // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
+  return (
+  // ส่งผลลัพธ์ออกจากฟังก์ชันและหยุดทำบรรทัดถัดไปในฟังก์ชันนี้
     <div><PageHeader title="รายงานข้อมูลผิด" back />
       <form className="space-y-5 px-5 py-6" onSubmit={submit}>
         {/* Chip เปลี่ยน reason แต่ไม่ Submit เพราะกำหนด type=button */}
