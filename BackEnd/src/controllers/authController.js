@@ -6,9 +6,14 @@ import { prisma } from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 
 function createToken(user) {
+  // jwt.sign() สร้าง Token ที่ Backend สามารถตรวจสอบภายหลังได้
   return jwt.sign(
+    // Payload: เก็บ id สำหรับระบุผู้ใช้ และ role สำหรับตรวจสิทธิ์ Member/Admin
+    // ไม่ใส่ password หรือข้อมูลลับลงใน Token
     { userId: user.id, role: user.role },
+    // Secret ใช้เซ็นและตรวจลายเซ็น Token ต้องตรงกับค่า JWT_SECRET ใน .env
     process.env.JWT_SECRET,
+    // Token หมดอายุใน 7 วัน หลังจากนั้นผู้ใช้ต้อง Login ใหม่
     { expiresIn: "7d" }
   );
 }
