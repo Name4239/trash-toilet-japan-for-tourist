@@ -84,8 +84,7 @@ URL `http://localhost:5000/api` อาจตอบ 404 ได้เพราะ 
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "db:create": "node scripts/createDatabase.js",
-    "seed:demo": "node scripts/seedDemo.js"
+    "db:create": "node scripts/createDatabase.js"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.9.1",

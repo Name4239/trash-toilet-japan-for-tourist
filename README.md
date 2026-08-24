@@ -105,16 +105,7 @@ npm run dev
 
 เปิด `http://localhost:5173`
 
-## บัญชีทดสอบ
+## เตรียมบัญชี Admin สำหรับทดสอบ
 
-สร้างหรืออัปเดตข้อมูลตัวอย่างจากโฟลเดอร์ `BackEnd`:
-
-```powershell
-npm run seed:demo
-```
-
-```text
-Member: demo.member@example.com / 123456
-Admin:  demo.admin@example.com / 123456
-```
+สมัครสมาชิกจากหน้า Register ก่อน จากนั้นรัน `npx prisma studio` ในโฟลเดอร์ `BackEnd` แล้วเปลี่ยนค่า `role` ของบัญชีนั้นจาก `member` เป็น `admin`.
 
